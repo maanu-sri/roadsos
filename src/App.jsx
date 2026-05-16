@@ -255,18 +255,22 @@ export default function RoadSoS() {
     ).join("\n");
 
     try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-api-key": "YOUR_KEY_HERE", "anthropic-version": "2023-06-01" },
-        body: JSON.stringify({
-          model: "claude-haiku-4-5-20251001",
-          max_tokens: 300,
-          system: `You are RoadSoS, an emergency assistant for road accident victims in India. Be extremely concise, calm, and directive. The user is in panic mode. Always tell them which service to call FIRST. Never give long paragraphs. Use short sentences. Nearby services:\n${nearbyList}\nUser location: lat ${location?.lat}, lng ${location?.lng}`,
-          messages: [...chatMessages, userMsg].map(m => ({ role: m.role === "assistant" ? "assistant" : "user", content: m.text }))
-        })
-      });
-      const data = await res.json();
-      const reply = data.content?.[0]?.text || "Call 108 immediately for an ambulance.";
+      const res = await fetch(
+  `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${import.meta.env.VITE_GEMINI_KEY}`,
+  {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      contents: [{
+        parts: [{
+          text: `You are RoadSoS, an emergency assistant for road accident victims in India. Be extremely short and direct. Never write long paragraphs. User is in panic mode. Nearby services: ${nearbyList}\n\nUser says: ${text}`
+        }]
+      }]
+    })
+  }
+);
+const data = await res.json();
+const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Call 108 immediately.";
       setChatMessages(prev => [...prev, { role: "assistant", text: reply }]);
     } catch {
       setChatMessages(prev => [...prev, { role: "assistant", text: "No internet. Call 108 for ambulance or 112 for emergency services immediately." }]);
@@ -278,7 +282,11 @@ export default function RoadSoS() {
 
   // ─── Styles ──────────────────────────────────────────────────────────────────
   const css = `
-    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap');
+    @impo    messages: [...chatMessages, userMsg].map(m => ({ role: m.role === "assistant" ? "assistant" : "user", content: m.text }))
+        })
+      });
+      const data = await res.json();
+      rt url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap');
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     body { background: #0a0a0a; color: #f0f0f0; font-family: 'DM Sans', sans-serif; }
     .app { max-width: 430px; margin: 0 auto; min-height: 100vh; background: #111; position: relative; overflow: hidden; }
