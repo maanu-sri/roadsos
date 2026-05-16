@@ -255,22 +255,13 @@ export default function RoadSoS() {
     ).join("\n");
 
     try {
-      const res = await fetch(
-  `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${import.meta.env.VITE_GEMINI_KEY}`,
-  {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      contents: [{
-        parts: [{
-          text: `You are RoadSoS, an emergency assistant for road accident victims in India. Be extremely short and direct. Never write long paragraphs. User is in panic mode. Nearby services: ${nearbyList}\n\nUser says: ${text}`
-        }]
-      }]
-    })
-  }
-);
+      const res = await fetch("/api/chat", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ message: text, nearbyList })
+});
 const data = await res.json();
-const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Call 108 immediately.";
+const reply = data.reply || "Call 108 immediately.";
       setChatMessages(prev => [...prev, { role: "assistant", text: reply }]);
     } catch {
       setChatMessages(prev => [...prev, { role: "assistant", text: "No internet. Call 108 for ambulance or 112 for emergency services immediately." }]);
