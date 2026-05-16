@@ -1,32 +1,140 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-
-// ─── Embedded offline dataset (Tamil Nadu core cities) ───────────────────────
+ 
+// ─── Expanded offline dataset — Tamil Nadu + Indian metros + International ────
+// Sources: data.gov.in, NHP India, 112 India, OpenStreetMap
 const OFFLINE_DATA = {
+ 
+  // ── TAMIL NADU ──────────────────────────────────────────────────────────────
   coimbatore: [
-    { id: 1, name: "Coimbatore Medical College Hospital", type: "hospital", isTrauma: true, phone: "0422-2301393", lat: 11.0168, lng: 76.9558, address: "Trichy Road, Coimbatore", open24h: true },
-    { id: 2, name: "GKNM Hospital", type: "hospital", isTrauma: true, phone: "0422-4305000", lat: 11.0070, lng: 76.9629, address: "Pappanaickenpalayam, Coimbatore", open24h: true },
-    { id: 3, name: "Sri Ramakrishna Hospital", type: "hospital", isTrauma: false, phone: "0422-4500000", lat: 11.0215, lng: 76.9740, address: "395 Sarojini Naidu Road, Coimbatore", open24h: true },
-    { id: 4, name: "Coimbatore City Police Control", type: "police", isTrauma: false, phone: "0422-2394444", lat: 11.0050, lng: 76.9630, address: "Race Course Road, Coimbatore", open24h: true },
-    { id: 5, name: "RS Puram Police Station", type: "police", isTrauma: false, phone: "0422-2543100", lat: 10.9976, lng: 76.9631, address: "RS Puram, Coimbatore", open24h: true },
-    { id: 6, name: "GVK EMRI Ambulance (108)", type: "ambulance", isTrauma: false, phone: "108", lat: 11.0168, lng: 76.9558, address: "Serves all of Coimbatore", open24h: true },
-    { id: 7, name: "Sundaram Motors Service", type: "service", isTrauma: false, phone: "0422-4225555", lat: 11.0134, lng: 76.9766, address: "Avinashi Road, Coimbatore", open24h: false },
-    { id: 8, name: "HP Petrol Bunk Gandhipuram", type: "fuel", isTrauma: false, phone: null, lat: 11.0174, lng: 76.9674, address: "Gandhipuram, Coimbatore", open24h: true },
-    { id: 9, name: "Tata Motors Towing", type: "towing", isTrauma: false, phone: "1800-209-7979", lat: 11.0220, lng: 76.9700, address: "Avinashi Road, Coimbatore", open24h: true },
+    { id: 1,  name: "Coimbatore Medical College Hospital", type: "hospital",  isTrauma: true,  phone: "0422-2301393",  lat: 11.0168, lng: 76.9558, address: "Trichy Road, Coimbatore", open24h: true },
+    { id: 2,  name: "GKNM Hospital",                       type: "hospital",  isTrauma: true,  phone: "0422-4305000",  lat: 11.0070, lng: 76.9629, address: "Pappanaickenpalayam, Coimbatore", open24h: true },
+    { id: 3,  name: "Sri Ramakrishna Hospital",            type: "hospital",  isTrauma: true,  phone: "0422-4500000",  lat: 11.0215, lng: 76.9740, address: "395 Sarojini Naidu Road, Coimbatore", open24h: true },
+    { id: 4,  name: "KG Hospital",                         type: "hospital",  isTrauma: true,  phone: "0422-2212911",  lat: 11.0090, lng: 76.9654, address: "Arts College Road, Coimbatore", open24h: true },
+    { id: 5,  name: "PSG Hospitals",                       type: "hospital",  isTrauma: false, phone: "0422-4345000",  lat: 11.0274, lng: 76.9930, address: "Peelamedu, Coimbatore", open24h: true },
+    { id: 6,  name: "Coimbatore City Police Control",      type: "police",    isTrauma: false, phone: "0422-2394444",  lat: 11.0050, lng: 76.9630, address: "Race Course Road, Coimbatore", open24h: true },
+    { id: 7,  name: "RS Puram Police Station",             type: "police",    isTrauma: false, phone: "0422-2543100",  lat: 10.9976, lng: 76.9631, address: "RS Puram, Coimbatore", open24h: true },
+    { id: 8,  name: "Peelamedu Police Station",            type: "police",    isTrauma: false, phone: "0422-2572566",  lat: 11.0274, lng: 76.9930, address: "Peelamedu, Coimbatore", open24h: true },
+    { id: 9,  name: "GVK EMRI Ambulance (108)",            type: "ambulance", isTrauma: false, phone: "108",           lat: 11.0168, lng: 76.9558, address: "Serves all of Coimbatore", open24h: true },
+    { id: 10, name: "Ziqitza Ambulance",                   type: "ambulance", isTrauma: false, phone: "1800-233-1000", lat: 11.0100, lng: 76.9600, address: "Coimbatore", open24h: true },
+    { id: 11, name: "Sundaram Motors Service",             type: "service",   isTrauma: false, phone: "0422-4225555",  lat: 11.0134, lng: 76.9766, address: "Avinashi Road, Coimbatore", open24h: false },
+    { id: 12, name: "TAFE Service Centre",                 type: "service",   isTrauma: false, phone: "0422-2240271",  lat: 11.0050, lng: 76.9700, address: "Trichy Road, Coimbatore", open24h: false },
+    { id: 13, name: "HP Petrol Bunk Gandhipuram",          type: "fuel",      isTrauma: false, phone: null,            lat: 11.0174, lng: 76.9674, address: "Gandhipuram, Coimbatore", open24h: true },
+    { id: 14, name: "Indian Oil Avinashi Road",            type: "fuel",      isTrauma: false, phone: null,            lat: 11.0220, lng: 76.9800, address: "Avinashi Road, Coimbatore", open24h: true },
+    { id: 15, name: "Tata Motors Towing",                  type: "towing",    isTrauma: false, phone: "1800-209-7979", lat: 11.0220, lng: 76.9700, address: "Avinashi Road, Coimbatore", open24h: true },
+    { id: 16, name: "National Highway Towing (1033)",      type: "towing",    isTrauma: false, phone: "1033",          lat: 11.0168, lng: 76.9558, address: "Coimbatore", open24h: true },
   ],
+ 
   chennai: [
-    { id: 10, name: "Rajiv Gandhi Government General Hospital", type: "hospital", isTrauma: true, phone: "044-25305000", lat: 13.0836, lng: 80.2823, address: "Park Town, Chennai", open24h: true },
-    { id: 11, name: "Apollo Hospitals Chennai", type: "hospital", isTrauma: true, phone: "044-28296000", lat: 13.0602, lng: 80.2570, address: "Greams Road, Chennai", open24h: true },
-    { id: 12, name: "Chennai City Police Control", type: "police", isTrauma: false, phone: "044-28447777", lat: 13.0827, lng: 80.2707, address: "Vepery, Chennai", open24h: true },
-    { id: 13, name: "GVK EMRI Ambulance (108)", type: "ambulance", isTrauma: false, phone: "108", lat: 13.0827, lng: 80.2707, address: "Serves all of Chennai", open24h: true },
+    { id: 17, name: "Rajiv Gandhi Govt General Hospital",  type: "hospital",  isTrauma: true,  phone: "044-25305000",  lat: 13.0836, lng: 80.2823, address: "Park Town, Chennai", open24h: true },
+    { id: 18, name: "Apollo Hospitals",                    type: "hospital",  isTrauma: true,  phone: "044-28296000",  lat: 13.0602, lng: 80.2570, address: "Greams Road, Chennai", open24h: true },
+    { id: 19, name: "Stanley Medical College Hospital",    type: "hospital",  isTrauma: true,  phone: "044-25281201",  lat: 13.1072, lng: 80.2849, address: "Old Jail Road, Chennai", open24h: true },
+    { id: 20, name: "Fortis Malar Hospital",               type: "hospital",  isTrauma: true,  phone: "044-42892222",  lat: 13.0035, lng: 80.2560, address: "Adyar, Chennai", open24h: true },
+    { id: 21, name: "MIOT International",                  type: "hospital",  isTrauma: true,  phone: "044-22492288",  lat: 13.0072, lng: 80.1741, address: "Manapakkam, Chennai", open24h: true },
+    { id: 22, name: "Chennai City Police Control",         type: "police",    isTrauma: false, phone: "044-28447777",  lat: 13.0827, lng: 80.2707, address: "Vepery, Chennai", open24h: true },
+    { id: 23, name: "Adyar Police Station",                type: "police",    isTrauma: false, phone: "044-24420685",  lat: 13.0012, lng: 80.2565, address: "Adyar, Chennai", open24h: true },
+    { id: 24, name: "Anna Nagar Police Station",           type: "police",    isTrauma: false, phone: "044-26221166",  lat: 13.0850, lng: 80.2101, address: "Anna Nagar, Chennai", open24h: true },
+    { id: 25, name: "GVK EMRI Ambulance (108)",            type: "ambulance", isTrauma: false, phone: "108",           lat: 13.0827, lng: 80.2707, address: "Serves all of Chennai", open24h: true },
+    { id: 26, name: "Chennai Port Trust Ambulance",        type: "ambulance", isTrauma: false, phone: "044-25361777",  lat: 13.0900, lng: 80.2900, address: "Chennai Port", open24h: true },
+    { id: 27, name: "Maruti Suzuki Service Chennai",       type: "service",   isTrauma: false, phone: "044-28151616",  lat: 13.0700, lng: 80.2100, address: "Vadapalani, Chennai", open24h: false },
+    { id: 28, name: "Indian Oil T Nagar",                  type: "fuel",      isTrauma: false, phone: null,            lat: 13.0418, lng: 80.2341, address: "T Nagar, Chennai", open24h: true },
+    { id: 29, name: "National Highway Towing (1033)",      type: "towing",    isTrauma: false, phone: "1033",          lat: 13.0827, lng: 80.2707, address: "Chennai", open24h: true },
   ],
+ 
+  madurai: [
+    { id: 30, name: "Govt Rajaji Hospital",                type: "hospital",  isTrauma: true,  phone: "0452-2532535",  lat: 9.9252,  lng: 78.1198, address: "Panagal Road, Madurai", open24h: true },
+    { id: 31, name: "Meenakshi Mission Hospital",          type: "hospital",  isTrauma: true,  phone: "0452-2588741",  lat: 9.9150,  lng: 78.1300, address: "Lake Area, Madurai", open24h: true },
+    { id: 32, name: "Apollo Hospital Madurai",             type: "hospital",  isTrauma: true,  phone: "0452-6699000",  lat: 9.9400,  lng: 78.1100, address: "Alagarkoil Road, Madurai", open24h: true },
+    { id: 33, name: "Madurai City Police Control",         type: "police",    isTrauma: false, phone: "0452-2530229",  lat: 9.9252,  lng: 78.1198, address: "Police HQ, Madurai", open24h: true },
+    { id: 34, name: "GVK EMRI Ambulance (108)",            type: "ambulance", isTrauma: false, phone: "108",           lat: 9.9252,  lng: 78.1198, address: "Serves all of Madurai", open24h: true },
+    { id: 35, name: "HP Petrol Bunk Madurai",              type: "fuel",      isTrauma: false, phone: null,            lat: 9.9300,  lng: 78.1200, address: "Bypass Road, Madurai", open24h: true },
+    { id: 36, name: "National Highway Towing (1033)",      type: "towing",    isTrauma: false, phone: "1033",          lat: 9.9252,  lng: 78.1198, address: "Madurai", open24h: true },
+  ],
+ 
+  trichy: [
+    { id: 37, name: "Govt KAP Viswanatham Medical College",type: "hospital",  isTrauma: true,  phone: "0431-2414098",  lat: 10.8050, lng: 78.6856, address: "Palpannai, Trichy", open24h: true },
+    { id: 38, name: "Bharat Hospitals",                    type: "hospital",  isTrauma: true,  phone: "0431-2746666",  lat: 10.7900, lng: 78.7000, address: "Cantonment, Trichy", open24h: true },
+    { id: 39, name: "Trichy City Police Control",          type: "police",    isTrauma: false, phone: "0431-2460400",  lat: 10.8050, lng: 78.6856, address: "Trichy", open24h: true },
+    { id: 40, name: "GVK EMRI Ambulance (108)",            type: "ambulance", isTrauma: false, phone: "108",           lat: 10.8050, lng: 78.6856, address: "Serves all of Trichy", open24h: true },
+    { id: 41, name: "Indian Oil Trichy",                   type: "fuel",      isTrauma: false, phone: null,            lat: 10.8100, lng: 78.6900, address: "NH Bypass, Trichy", open24h: true },
+    { id: 42, name: "National Highway Towing (1033)",      type: "towing",    isTrauma: false, phone: "1033",          lat: 10.8050, lng: 78.6856, address: "Trichy", open24h: true },
+  ],
+ 
+  salem: [
+    { id: 43, name: "Govt Mohan Kumaramangalam Medical College", type: "hospital", isTrauma: true, phone: "0427-2249264", lat: 11.6643, lng: 78.1460, address: "Saradha College Road, Salem", open24h: true },
+    { id: 44, name: "SKS Hospital Salem",                  type: "hospital",  isTrauma: true,  phone: "0427-4000000",  lat: 11.6500, lng: 78.1600, address: "Omalur Road, Salem", open24h: true },
+    { id: 45, name: "Salem City Police Control",           type: "police",    isTrauma: false, phone: "0427-2411100",  lat: 11.6643, lng: 78.1460, address: "Salem", open24h: true },
+    { id: 46, name: "GVK EMRI Ambulance (108)",            type: "ambulance", isTrauma: false, phone: "108",           lat: 11.6643, lng: 78.1460, address: "Serves all of Salem", open24h: true },
+    { id: 47, name: "National Highway Towing (1033)",      type: "towing",    isTrauma: false, phone: "1033",          lat: 11.6643, lng: 78.1460, address: "Salem", open24h: true },
+  ],
+ 
+  // ── INDIAN METROS ───────────────────────────────────────────────────────────
   bangalore: [
-    { id: 14, name: "Victoria Hospital Bangalore", type: "hospital", isTrauma: true, phone: "080-26701150", lat: 12.9650, lng: 77.5710, address: "Fort Road, Bangalore", open24h: true },
-    { id: 15, name: "Manipal Hospital", type: "hospital", isTrauma: true, phone: "080-25024444", lat: 12.9513, lng: 77.5988, address: "HAL Airport Road, Bangalore", open24h: true },
-    { id: 16, name: "Bangalore Police Control", type: "police", isTrauma: false, phone: "080-22942222", lat: 12.9716, lng: 77.5946, address: "Infantry Road, Bangalore", open24h: true },
-    { id: 17, name: "KSRTC Ambulance (108)", type: "ambulance", isTrauma: false, phone: "108", lat: 12.9716, lng: 77.5946, address: "Serves all of Bangalore", open24h: true },
+    { id: 48, name: "Victoria Hospital",                   type: "hospital",  isTrauma: true,  phone: "080-26701150",  lat: 12.9650, lng: 77.5710, address: "Fort Road, Bangalore", open24h: true },
+    { id: 49, name: "Manipal Hospital",                    type: "hospital",  isTrauma: true,  phone: "080-25024444",  lat: 12.9513, lng: 77.5988, address: "HAL Airport Road, Bangalore", open24h: true },
+    { id: 50, name: "Narayana Health City",                type: "hospital",  isTrauma: true,  phone: "080-71222222",  lat: 12.8987, lng: 77.6080, address: "Bommasandra, Bangalore", open24h: true },
+    { id: 51, name: "St Johns Medical College Hospital",   type: "hospital",  isTrauma: true,  phone: "080-22065000",  lat: 12.9340, lng: 77.6210, address: "Sarjapur Road, Bangalore", open24h: true },
+    { id: 52, name: "Bangalore Police Control",            type: "police",    isTrauma: false, phone: "080-22942222",  lat: 12.9716, lng: 77.5946, address: "Infantry Road, Bangalore", open24h: true },
+    { id: 53, name: "Whitefield Police Station",           type: "police",    isTrauma: false, phone: "080-22943700",  lat: 12.9698, lng: 77.7500, address: "Whitefield, Bangalore", open24h: true },
+    { id: 54, name: "GVK EMRI Ambulance (108)",            type: "ambulance", isTrauma: false, phone: "108",           lat: 12.9716, lng: 77.5946, address: "Serves all of Bangalore", open24h: true },
+    { id: 55, name: "Maruti Suzuki Service Bangalore",     type: "service",   isTrauma: false, phone: "080-23526464",  lat: 12.9800, lng: 77.5800, address: "Yeshwanthpur, Bangalore", open24h: false },
+    { id: 56, name: "BPCL Petrol Bunk MG Road",            type: "fuel",      isTrauma: false, phone: null,            lat: 12.9757, lng: 77.6099, address: "MG Road, Bangalore", open24h: true },
+    { id: 57, name: "National Highway Towing (1033)",      type: "towing",    isTrauma: false, phone: "1033",          lat: 12.9716, lng: 77.5946, address: "Bangalore", open24h: true },
+  ],
+ 
+  mumbai: [
+    { id: 58, name: "KEM Hospital",                        type: "hospital",  isTrauma: true,  phone: "022-24136051",  lat: 18.9900, lng: 72.8400, address: "Parel, Mumbai", open24h: true },
+    { id: 59, name: "Lilavati Hospital",                   type: "hospital",  isTrauma: true,  phone: "022-26751000",  lat: 19.0544, lng: 72.8322, address: "Bandra West, Mumbai", open24h: true },
+    { id: 60, name: "Tata Memorial Hospital",              type: "hospital",  isTrauma: false, phone: "022-24177000",  lat: 18.9980, lng: 72.8130, address: "Parel, Mumbai", open24h: true },
+    { id: 61, name: "Mumbai Police Control",               type: "police",    isTrauma: false, phone: "022-22621855",  lat: 18.9400, lng: 72.8300, address: "Crawford Market, Mumbai", open24h: true },
+    { id: 62, name: "EMRI Ambulance (108)",                type: "ambulance", isTrauma: false, phone: "108",           lat: 19.0760, lng: 72.8777, address: "Serves all of Mumbai", open24h: true },
+    { id: 63, name: "Indian Oil Bandra",                   type: "fuel",      isTrauma: false, phone: null,            lat: 19.0544, lng: 72.8322, address: "Bandra, Mumbai", open24h: true },
+    { id: 64, name: "National Highway Towing (1033)",      type: "towing",    isTrauma: false, phone: "1033",          lat: 19.0760, lng: 72.8777, address: "Mumbai", open24h: true },
+  ],
+ 
+  delhi: [
+    { id: 65, name: "AIIMS Delhi",                         type: "hospital",  isTrauma: true,  phone: "011-26588500",  lat: 28.5672, lng: 77.2100, address: "Ansari Nagar, New Delhi", open24h: true },
+    { id: 66, name: "Safdarjung Hospital",                 type: "hospital",  isTrauma: true,  phone: "011-26730000",  lat: 28.5694, lng: 77.2060, address: "Ring Road, New Delhi", open24h: true },
+    { id: 67, name: "Max Hospital Saket",                  type: "hospital",  isTrauma: true,  phone: "011-26515050",  lat: 28.5247, lng: 77.2147, address: "Saket, New Delhi", open24h: true },
+    { id: 68, name: "Delhi Police Control",                type: "police",    isTrauma: false, phone: "011-23490000",  lat: 28.6139, lng: 77.2090, address: "ITO, New Delhi", open24h: true },
+    { id: 69, name: "CATS Ambulance Delhi (102)",          type: "ambulance", isTrauma: false, phone: "102",           lat: 28.6139, lng: 77.2090, address: "Serves all of Delhi", open24h: true },
+    { id: 70, name: "Indian Oil Connaught Place",          type: "fuel",      isTrauma: false, phone: null,            lat: 28.6315, lng: 77.2167, address: "Connaught Place, Delhi", open24h: true },
+    { id: 71, name: "National Highway Towing (1033)",      type: "towing",    isTrauma: false, phone: "1033",          lat: 28.6139, lng: 77.2090, address: "Delhi", open24h: true },
+  ],
+ 
+  hyderabad: [
+    { id: 72, name: "Osmania General Hospital",            type: "hospital",  isTrauma: true,  phone: "040-24600124",  lat: 17.3850, lng: 78.4867, address: "Afzalgunj, Hyderabad", open24h: true },
+    { id: 73, name: "Apollo Hospital Hyderabad",           type: "hospital",  isTrauma: true,  phone: "040-23607777",  lat: 17.4250, lng: 78.4480, address: "Jubilee Hills, Hyderabad", open24h: true },
+    { id: 74, name: "Hyderabad City Police Control",       type: "police",    isTrauma: false, phone: "040-27852425",  lat: 17.3850, lng: 78.4867, address: "Basheerbagh, Hyderabad", open24h: true },
+    { id: 75, name: "GVK EMRI Ambulance (108)",            type: "ambulance", isTrauma: false, phone: "108",           lat: 17.3850, lng: 78.4867, address: "Serves all of Hyderabad", open24h: true },
+    { id: 76, name: "Indian Oil Banjara Hills",            type: "fuel",      isTrauma: false, phone: null,            lat: 17.4150, lng: 78.4480, address: "Banjara Hills, Hyderabad", open24h: true },
+    { id: 77, name: "National Highway Towing (1033)",      type: "towing",    isTrauma: false, phone: "1033",          lat: 17.3850, lng: 78.4867, address: "Hyderabad", open24h: true },
+  ],
+ 
+  // ── INTERNATIONAL (global applicability criterion) ──────────────────────────
+  singapore: [
+    { id: 78, name: "Singapore General Hospital",          type: "hospital",  isTrauma: true,  phone: "+65-6222-3322", lat: 1.2796,  lng: 103.8355, address: "Outram Road, Singapore", open24h: true },
+    { id: 79, name: "Tan Tock Seng Hospital",              type: "hospital",  isTrauma: true,  phone: "+65-6256-6011", lat: 1.3210,  lng: 103.8460, address: "Moulmein Road, Singapore", open24h: true },
+    { id: 80, name: "Singapore Police (999)",              type: "police",    isTrauma: false, phone: "999",           lat: 1.3521,  lng: 103.8198, address: "Serves all of Singapore", open24h: true },
+    { id: 81, name: "SCDF Ambulance (995)",                type: "ambulance", isTrauma: false, phone: "995",           lat: 1.3521,  lng: 103.8198, address: "Serves all of Singapore", open24h: true },
+    { id: 82, name: "Shell Orchard Road",                  type: "fuel",      isTrauma: false, phone: null,            lat: 1.3048,  lng: 103.8318, address: "Orchard Road, Singapore", open24h: true },
+  ],
+ 
+  london: [
+    { id: 83, name: "Kings College Hospital",              type: "hospital",  isTrauma: true,  phone: "+44-20-3299-9000", lat: 51.4677, lng: -0.0936, address: "Denmark Hill, London", open24h: true },
+    { id: 84, name: "Royal London Hospital",               type: "hospital",  isTrauma: true,  phone: "+44-20-7377-7000", lat: 51.5182, lng: -0.0598, address: "Whitechapel, London", open24h: true },
+    { id: 85, name: "Metropolitan Police (999)",           type: "police",    isTrauma: false, phone: "999",           lat: 51.5074, lng: -0.1278, address: "Serves all of London", open24h: true },
+    { id: 86, name: "London Ambulance (999)",              type: "ambulance", isTrauma: false, phone: "999",           lat: 51.5074, lng: -0.1278, address: "Serves all of London", open24h: true },
+    { id: 87, name: "BP Petrol Station Victoria",          type: "fuel",      isTrauma: false, phone: null,            lat: 51.4965, lng: -0.1447, address: "Victoria, London", open24h: true },
+  ],
+ 
+  dubai: [
+    { id: 88, name: "Rashid Hospital Dubai",               type: "hospital",  isTrauma: true,  phone: "+971-4-219-1000", lat: 25.2285, lng: 55.3273, address: "Umm Hurair, Dubai", open24h: true },
+    { id: 89, name: "Dubai Police (999)",                  type: "police",    isTrauma: false, phone: "999",           lat: 25.2048, lng: 55.2708, address: "Serves all of Dubai", open24h: true },
+    { id: 90, name: "Dubai Ambulance (998)",               type: "ambulance", isTrauma: false, phone: "998",           lat: 25.2048, lng: 55.2708, address: "Serves all of Dubai", open24h: true },
+    { id: 91, name: "ENOC Petrol Station Sheikh Zayed",    type: "fuel",      isTrauma: false, phone: null,            lat: 25.2110, lng: 55.2800, address: "Sheikh Zayed Road, Dubai", open24h: true },
   ],
 };
-
+ 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function haversineDistance(lat1, lng1, lat2, lng2) {
   const R = 6371;
@@ -35,21 +143,30 @@ function haversineDistance(lat1, lng1, lat2, lng2) {
   const a = Math.sin(dLat / 2) ** 2 + Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
-
+ 
 function detectCity(lat, lng) {
   const cities = {
     coimbatore: { lat: 11.0168, lng: 76.9558 },
-    chennai: { lat: 13.0827, lng: 80.2707 },
-    bangalore: { lat: 12.9716, lng: 77.5946 },
+    chennai:    { lat: 13.0827, lng: 80.2707 },
+    madurai:    { lat: 9.9252,  lng: 78.1198 },
+    trichy:     { lat: 10.8050, lng: 78.6856 },
+    salem:      { lat: 11.6643, lng: 78.1460 },
+    bangalore:  { lat: 12.9716, lng: 77.5946 },
+    mumbai:     { lat: 19.0760, lng: 72.8777 },
+    delhi:      { lat: 28.6139, lng: 77.2090 },
+    hyderabad:  { lat: 17.3850, lng: 78.4867 },
+    singapore:  { lat: 1.3521,  lng: 103.8198 },
+    london:     { lat: 51.5074, lng: -0.1278 },
+    dubai:      { lat: 25.2048, lng: 55.2708 },
   };
   let closest = "coimbatore", minDist = Infinity;
   for (const [city, coords] of Object.entries(cities)) {
     const d = haversineDistance(lat, lng, coords.lat, coords.lng);
     if (d < minDist) { minDist = d; closest = city; }
   }
-  return minDist < 100 ? closest : "coimbatore";
+  return closest;
 }
-
+ 
 function getServicesNear(lat, lng, filterType = "all") {
   const city = detectCity(lat, lng);
   const data = OFFLINE_DATA[city] || OFFLINE_DATA.coimbatore;
@@ -58,7 +175,7 @@ function getServicesNear(lat, lng, filterType = "all") {
     .map(s => ({ ...s, distance: haversineDistance(lat, lng, s.lat, s.lng) }))
     .sort((a, b) => a.distance - b.distance);
 }
-
+ 
 const TYPE_CONFIG = {
   all:      { label: "All",       icon: "⊕", color: "#e53e3e" },
   hospital: { label: "Hospitals", icon: "🏥", color: "#e53e3e" },
@@ -68,7 +185,7 @@ const TYPE_CONFIG = {
   fuel:     { label: "Fuel",      icon: "⛽", color: "#38a169" },
   service:  { label: "Service",   icon: "🔩", color: "#805ad5" },
 };
-
+ 
 // ─── IndexedDB offline cache ──────────────────────────────────────────────────
 async function saveToCache(key, data) {
   try {
@@ -77,7 +194,7 @@ async function saveToCache(key, data) {
     tx.objectStore("cache").put({ key, data, ts: Date.now() });
   } catch {}
 }
-
+ 
 async function loadFromCache(key) {
   try {
     const db = await openDB();
@@ -89,7 +206,7 @@ async function loadFromCache(key) {
     });
   } catch { return null; }
 }
-
+ 
 function openDB() {
   return new Promise((res, rej) => {
     const req = indexedDB.open("roadsos", 1);
@@ -98,7 +215,7 @@ function openDB() {
     req.onerror = () => rej();
   });
 }
-
+ 
 // ─── Main App ─────────────────────────────────────────────────────────────────
 export default function RoadSoS() {
   const [screen, setScreen] = useState("home"); // home | map | sos | chat
@@ -118,7 +235,7 @@ export default function RoadSoS() {
   const mapRef = useRef(null);
   const leafletMap = useRef(null);
   const chatEndRef = useRef(null);
-
+ 
   // Online/offline listener
   useEffect(() => {
     const on = () => setIsOnline(true);
@@ -127,20 +244,20 @@ export default function RoadSoS() {
     window.addEventListener("offline", off);
     return () => { window.removeEventListener("online", on); window.removeEventListener("offline", off); };
   }, []);
-
+ 
   // Auto-locate on mount
   useEffect(() => { getLocation(); }, []);
-
+ 
   // Load Leaflet
   useEffect(() => {
     if (screen !== "map" || !location) return;
     const timer = setTimeout(() => initMap(), 300);
     return () => clearTimeout(timer);
   }, [screen, location, services]);
-
+ 
   // Scroll chat
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [chatMessages]);
-
+ 
   function getLocation() {
     setLocating(true);
     setLocationError(null);
@@ -176,14 +293,14 @@ export default function RoadSoS() {
       { timeout: 8000, enableHighAccuracy: true }
     );
   }
-
+ 
   function loadServices(lat, lng) {
     // Instant from local dataset — zero network needed
     const results = getServicesNear(lat, lng, "all");
     setServices(results);
     saveToCache("lastServices", results);
   }
-
+ 
   async function initMap() {
     if (!mapRef.current || leafletMap.current) return;
     if (!window.L) {
@@ -199,11 +316,11 @@ export default function RoadSoS() {
       attribution: "© OpenStreetMap contributors",
       maxZoom: 19,
     }).addTo(map);
-
+ 
     // User marker
     L.circleMarker([location.lat, location.lng], { radius: 10, fillColor: "#e53e3e", fillOpacity: 1, color: "#fff", weight: 3 })
       .addTo(map).bindPopup("<b>You are here</b>").openPopup();
-
+ 
     // Service markers
     const filtered = filter === "all" ? services : services.filter(s => s.type === filter);
     filtered.slice(0, 10).forEach(s => {
@@ -217,7 +334,7 @@ export default function RoadSoS() {
         .bindPopup(`<b>${s.name}</b><br>${s.address}<br>${s.phone ? `<a href="tel:${s.phone}" style="color:#e53e3e;font-weight:600">📞 ${s.phone}</a>` : ""}`)
     });
   }
-
+ 
   function loadScript(src) {
     return new Promise(res => {
       const s = document.createElement("script"); s.src = src; s.onload = res; document.head.appendChild(s);
@@ -226,7 +343,7 @@ export default function RoadSoS() {
   function loadCSS(href) {
     const l = document.createElement("link"); l.rel = "stylesheet"; l.href = href; document.head.appendChild(l);
   }
-
+ 
   function sendSOS() {
     if (!location) return;
     const nearest = services.find(s => s.type === "hospital") || services[0];
@@ -242,42 +359,43 @@ export default function RoadSoS() {
     setSosSent(true);
     setTimeout(() => setSosSent(false), 5000);
   }
-
+ 
   async function sendChat(text) {
     if (!text.trim()) return;
     const userMsg = { role: "user", text };
     setChatMessages(prev => [...prev, userMsg]);
     setChatInput("");
     setChatLoading(true);
-
+ 
     const nearbyList = services.slice(0, 5).map(s =>
       `${s.name} (${s.type}, ${s.distance?.toFixed(1)}km, phone: ${s.phone || "N/A"})`
     ).join("\n");
-
+ 
     try {
-      const res = await fetch("/api/chat", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ message: text, nearbyList })
-});
-const data = await res.json();
-const reply = data.reply || "Call 108 immediately.";
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-api-key": "YOUR_KEY_HERE", "anthropic-version": "2023-06-01" },
+        body: JSON.stringify({
+          model: "claude-haiku-4-5-20251001",
+          max_tokens: 300,
+          system: `You are RoadSoS, an emergency assistant for road accident victims in India. Be extremely concise, calm, and directive. The user is in panic mode. Always tell them which service to call FIRST. Never give long paragraphs. Use short sentences. Nearby services:\n${nearbyList}\nUser location: lat ${location?.lat}, lng ${location?.lng}`,
+          messages: [...chatMessages, userMsg].map(m => ({ role: m.role === "assistant" ? "assistant" : "user", content: m.text }))
+        })
+      });
+      const data = await res.json();
+      const reply = data.content?.[0]?.text || "Call 108 immediately for an ambulance.";
       setChatMessages(prev => [...prev, { role: "assistant", text: reply }]);
     } catch {
       setChatMessages(prev => [...prev, { role: "assistant", text: "No internet. Call 108 for ambulance or 112 for emergency services immediately." }]);
     }
     setChatLoading(false);
   }
-
+ 
   const filteredServices = filter === "all" ? services : services.filter(s => s.type === filter);
-
+ 
   // ─── Styles ──────────────────────────────────────────────────────────────────
   const css = `
-    @impo    messages: [...chatMessages, userMsg].map(m => ({ role: m.role === "assistant" ? "assistant" : "user", content: m.text }))
-        })
-      });
-      const data = await res.json();
-      rt url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap');
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     body { background: #0a0a0a; color: #f0f0f0; font-family: 'DM Sans', sans-serif; }
     .app { max-width: 430px; margin: 0 auto; min-height: 100vh; background: #111; position: relative; overflow: hidden; }
@@ -348,12 +466,12 @@ const reply = data.reply || "Call 108 immediately.";
     .pulse { animation: pulse 1.2s ease-in-out infinite; }
     .empty-state { padding: 32px 16px; text-align: center; color: #718096; font-size: 14px; }
   `;
-
+ 
   return (
     <>
       <style>{css}</style>
       <div className="app">
-
+ 
         {/* Status bar */}
         <div className="status-bar">
           <span>
@@ -362,7 +480,7 @@ const reply = data.reply || "Call 108 immediately.";
           </span>
           <span style={{ fontSize: 11, color: "#718096" }}>RoadSoS v1.0</span>
         </div>
-
+ 
         {/* Home screen */}
         {screen === "home" && (
           <>
@@ -374,13 +492,13 @@ const reply = data.reply || "Call 108 immediately.";
                 </div>
               )}
             </div>
-
+ 
             {locating && (
               <div className="locating pulse">
                 <span>📡</span> Detecting your location...
               </div>
             )}
-
+ 
             {/* Emergency quick-dial */}
             <div className="emergency-strip">
               <button className="emg-btn" onClick={() => window.location.href = "tel:108"}>
@@ -396,14 +514,14 @@ const reply = data.reply || "Call 108 immediately.";
                 <small>Police</small>
               </button>
             </div>
-
+ 
             {/* SOS button */}
             <div className="sos-mega">
               <button className={`sos-btn ${sosSent ? "sent" : ""}`} onClick={sendSOS}>
                 {sosSent ? "✓ Alert Sent to Family" : "🆘  SOS — Alert Family"}
               </button>
             </div>
-
+ 
             {/* Filter chips */}
             <p className="section-title">Nearby Services</p>
             <div className="filter-row">
@@ -413,7 +531,7 @@ const reply = data.reply || "Call 108 immediately.";
                 </button>
               ))}
             </div>
-
+ 
             {/* Services list */}
             <div className="services-list">
               {filteredServices.length === 0 && (
@@ -446,7 +564,7 @@ const reply = data.reply || "Call 108 immediately.";
             </div>
           </>
         )}
-
+ 
         {/* Map screen */}
         {screen === "map" && (
           <>
@@ -473,7 +591,7 @@ const reply = data.reply || "Call 108 immediately.";
             </div>
           </>
         )}
-
+ 
         {/* SOS screen */}
         {screen === "sos" && (
           <div className="sos-screen">
@@ -497,7 +615,7 @@ const reply = data.reply || "Call 108 immediately.";
                 {sosSent ? "✓ Alert Sent!" : "🆘 Send SOS Now"}
               </button>
             </div>
-
+ 
             {/* Nearest services quick view */}
             <p className="section-title" style={{ marginTop: 8 }}>Nearest Services</p>
             <div className="services-list" style={{ maxHeight: "none" }}>
@@ -519,7 +637,7 @@ const reply = data.reply || "Call 108 immediately.";
             </div>
           </div>
         )}
-
+ 
         {/* Chat screen */}
         {screen === "chat" && (
           <div className="chat-screen">
@@ -542,7 +660,7 @@ const reply = data.reply || "Call 108 immediately.";
             </div>
           </div>
         )}
-
+ 
         {/* Nav bar */}
         <div className="nav-bar">
           {[
@@ -558,7 +676,7 @@ const reply = data.reply || "Call 108 immediately.";
             </button>
           ))}
         </div>
-
+ 
       </div>
     </>
   );
