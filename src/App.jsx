@@ -248,12 +248,17 @@ export default function RoadSoS() {
   // Auto-locate on mount
   useEffect(() => { getLocation(); }, []);
  
-  // Load Leaflet
+  // Load Leaflet — re-runs when filter changes too
   useEffect(() => {
     if (screen !== "map" || !location) return;
+    // Destroy existing map before reinitializing
+    if (leafletMap.current) {
+      leafletMap.current.remove();
+      leafletMap.current = null;
+    }
     const timer = setTimeout(() => initMap(), 300);
     return () => clearTimeout(timer);
-  }, [screen, location, services]);
+  }, [screen, location, filter]);
  
   // Scroll chat
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [chatMessages]);
@@ -574,9 +579,9 @@ export default function RoadSoS() {
             <div className="filter-row">
               {Object.entries(TYPE_CONFIG).map(([key, cfg]) => (
                 <button key={key} className={`filter-chip ${filter === key ? "active" : ""}`}
-                  onClick={() => { setFilter(key); if (leafletMap.current) { leafletMap.current.remove(); leafletMap.current = null; } }}>
-                  {cfg.icon} {cfg.label}
-                </button>
+  onClick={() => setFilter(key)}>
+  {cfg.icon} {cfg.label}
+</button>
               ))}
             </div>
             <div className="map-container">
